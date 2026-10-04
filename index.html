@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>innercanvas — a quiet space to reflect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#fbf8f1;--bg2:#f4efe4;--wash:#e3ddee;--lav:#b9aed0;--dusk:#8f84ad;--haze:#d9cfe0;
+  --ink:#4a4560;--soft:#7a7590;--glass:rgba(255,255,255,.7);--glass2:rgba(255,255,255,.4);
+  --shadow:rgba(143,132,173,.35);--blobhi:#fff;
+  --fd:"Newsreader","Iowan Old Style",Georgia,serif;--fb:"Figtree","Avenir Next",system-ui,sans-serif;
+  --ease:cubic-bezier(.4,.1,.2,1);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg1:#1d1a2b;--bg2:#262238;--wash:#3a3354;--lav:#8c80ab;--dusk:#b4a8d2;--haze:#4a3f63;
+  --ink:#ece8f4;--soft:#a8a2bd;--glass:rgba(60,52,86,.55);--glass2:rgba(60,52,86,.3);--shadow:rgba(0,0,0,.4);--blobhi:#6b5f8d}}
+:root[data-theme="dark"]{
+  --bg1:#1d1a2b;--bg2:#262238;--wash:#3a3354;--lav:#8c80ab;--dusk:#b4a8d2;--haze:#4a3f63;
+  --ink:#ece8f4;--soft:#a8a2bd;--glass:rgba(60,52,86,.55);--glass2:rgba(60,52,86,.3);--shadow:rgba(0,0,0,.4);--blobhi:#6b5f8d}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);background:var(--bg1);font:400 clamp(1rem,.95rem + .25vw,1.125rem)/1.75 var(--fb);overflow-x:hidden;
+  background:radial-gradient(120% 60% at 50% -10%,var(--wash),transparent 60%),linear-gradient(180deg,var(--bg1),var(--bg2)) fixed}
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.sky::after{content:"";position:absolute;inset:auto -10% -25%;height:55%;background:radial-gradient(60% 100% at 50% 100%,var(--haze),transparent 70%);opacity:.7}
+.blob{position:absolute;opacity:.5;filter:blur(2px);background:radial-gradient(circle at 30% 30%,var(--blobhi),var(--wash) 38%,var(--lav));
+  border-radius:62% 38% 55% 45%/48% 58% 42% 52%;animation:drift 38s ease-in-out infinite alternate,morph 26s ease-in-out infinite alternate}
+.b1{width:34vmax;height:30vmax;top:-10vmax;right:-8vmax}
+.b2{width:22vmax;height:20vmax;bottom:8vh;left:-7vmax;opacity:.35;animation-duration:46s,32s;animation-delay:-12s,-6s}
+.b3{width:12vmax;height:11vmax;top:48vh;right:12vw;opacity:.3;animation-duration:54s,38s;animation-delay:-20s,-10s}
+@keyframes drift{to{transform:translate3d(3vw,5vh,0) rotate(8deg)}}
+@keyframes morph{to{border-radius:44% 56% 40% 60%/56% 42% 58% 44%}}
+.wrap{position:relative;z-index:1;width:min(100% - 3rem,48rem);margin-inline:auto;animation:settle 1.6s var(--ease) both}
+@keyframes settle{from{opacity:0;transform:translateY(8px)}}
+header{display:flex;justify-content:space-between;align-items:center;padding:2rem 0}
+.logo{font:300 1.5rem var(--fd);letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+nav{display:flex;gap:1.75rem;align-items:center}
+a{color:inherit}
+.q{color:var(--dusk);text-decoration:none;background:linear-gradient(var(--lav),var(--lav)) 0 100%/100% 1px no-repeat;padding:.3em 0;transition:background-size .5s var(--ease),color .5s}
+.q:hover{background-size:100% 3px;color:var(--ink)}
+section{padding-block:clamp(4.5rem,13vh,9rem) 0}
+h1,h2,h3{font-family:var(--fd);font-weight:300;line-height:1.2;letter-spacing:-.01em;margin:0 0 1.25rem;text-wrap:balance}
+h1{font-size:clamp(2.4rem,1.6rem + 3.6vw,4.25rem)}
+h2{font-size:clamp(1.7rem,1.3rem + 1.6vw,2.4rem)}
+h3{font-size:1.35rem;font-weight:400;margin-bottom:.5rem}
+p{margin:0 0 1.4em;max-width:60ch;text-wrap:pretty}
+.lede{font:300 clamp(1.2rem,1.1rem + .6vw,1.5rem)/1.6 var(--fd);color:var(--soft)}
+.soft{color:var(--soft)}
+.btn{display:inline-block;padding:.85em 2em;border:0;border-radius:999px;font:500 1rem var(--fb);color:var(--ink);cursor:pointer;
+  background:linear-gradient(135deg,var(--wash),var(--haze));box-shadow:0 10px 30px -14px var(--shadow);transition:transform .6s var(--ease),box-shadow .6s;text-decoration:none}
+.btn:hover{transform:translateY(-2px);box-shadow:0 16px 36px -14px var(--shadow)}
+:focus-visible{outline:2px solid var(--dusk);outline-offset:4px;border-radius:12px}
+.hero{display:grid;gap:2.5rem;padding-top:clamp(3rem,10vh,7rem)}
+.hero .btn{justify-self:start}
+.card{padding:clamp(1.75rem,4vw,3rem);border-radius:28px;background:linear-gradient(160deg,var(--glass),var(--glass2));
+  box-shadow:0 20px 60px -30px var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.moods{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.5rem 0}
+.moods button{font:inherit;font-size:.95rem;padding:.55em 1.2em;border-radius:999px;border:1px solid var(--lav);background:transparent;color:var(--ink);cursor:pointer;transition:background .5s,transform .5s var(--ease)}
+.moods button:hover{background:var(--wash)}
+.moods button[aria-pressed="true"]{background:var(--wash);border-color:var(--dusk);transform:translateY(-1px)}
+label{display:block;font:300 1.35rem/1.4 var(--fd);margin-bottom:.75rem}
+textarea{width:100%;min-height:9rem;resize:vertical;padding:1.1rem 1.25rem;border-radius:20px;border:1px solid var(--lav);background:var(--glass2);color:var(--ink);font:inherit;line-height:1.7}
+textarea::placeholder{color:var(--soft)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:1.25rem;flex-wrap:wrap}
+.log{list-style:none;margin:2rem 0 0;padding:0;display:grid;gap:1rem}
+.log li{padding:1rem 1.25rem;border-radius:20px;background:var(--glass2)}
+.log small{display:block;color:var(--soft);margin-bottom:.25rem}
+.breathe{display:grid;place-items:center;gap:1.5rem;text-align:center}
+.orb{width:min(46vw,11rem);aspect-ratio:1;background:radial-gradient(circle at 35% 30%,var(--blobhi),var(--wash) 40%,var(--lav));
+  border-radius:58% 42% 52% 48%/50% 55% 45% 50%;box-shadow:0 0 70px 10px var(--shadow);animation:br 8s ease-in-out infinite,morph 16s ease-in-out infinite alternate}
+@keyframes br{0%,100%{transform:scale(.7)}50%{transform:scale(1.05)}}
+.ways{display:grid;gap:3.5rem;margin-top:3rem}
+.way{display:grid;grid-template-columns:5rem 1fr;gap:1.75rem;align-items:start}
+.way i{display:block;width:5rem;height:4.4rem;background:radial-gradient(circle at 30% 30%,var(--blobhi),var(--haze) 55%,var(--lav));opacity:.85}
+.way:nth-child(1) i{border-radius:60% 40% 55% 45%/50% 60% 40% 50%}
+.way:nth-child(2) i{border-radius:40% 60% 45% 55%/60% 40% 60% 40%}
+.way:nth-child(3) i{border-radius:50% 50% 35% 65%/45% 55% 45% 55%}
+.way:nth-child(even){margin-left:clamp(0rem,6vw,4rem)}
+.way p{margin:0}
+.end{text-align:center;display:grid;justify-items:center}
+footer{padding:6rem 0 3rem;text-align:center;color:var(--soft);font-size:.9rem}
+footer p{margin-inline:auto}
+@media (max-width:600px){nav .hide{display:none}.way{grid-template-columns:3.5rem 1fr;gap:1.25rem}.way i{width:3.5rem;height:3.1rem}.blob{opacity:.35}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="wrap">
+  <header>
+    <a class="logo" href="#top">innercanvas</a>
+    <nav>
+      <a class="q hide" href="#practice">Reflect</a>
+      <a class="q hide" href="#ways">How it helps</a>
+      <a class="q" href="#privacy">Privacy</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <h1>A quiet room for your own thoughts.</h1>
+      <p class="lede">innercanvas is a gentle, cloud-based space to pause, notice how you feel, and write it down. No streaks, no scores, no pressure. Just room to breathe and grow at your own pace.</p>
+      <a class="btn" href="#practice">Begin with a check-in</a>
+    </section>
+
+    <section id="practice">
+      <div class="card">
+        <h2>How is the sky inside you today?</h2>
+        <p class="soft">Choose the weather that fits. There are no wrong answers.</p>
+        <div class="moods" id="moods" role="group" aria-label="Today's inner weather"></div>
+        <label for="note" id="prompt">What would you like to set down?</label>
+        <textarea id="note" placeholder="Write a few lines, or a few words. It's only for you."></textarea>
+        <div class="row">
+          <button class="btn" id="keep" type="button">Keep this reflection</button>
+          <a class="q" href="#" id="clear" hidden>Clear this device</a>
+        </div>
+        <ul class="log" id="log" aria-live="polite"></ul>
+        <p class="soft" style="margin:1.5rem 0 0;font-size:.9rem">In this preview, reflections stay in this browser only.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="breathe">
+        <div class="orb" aria-hidden="true"></div>
+        <p class="lede" id="cue" style="margin:0" aria-live="off">Breathe in</p>
+        <p class="soft" style="margin:0">One slow minute, whenever you need it.</p>
+      </div>
+    </section>
+
+    <section id="ways">
+      <h2>Awareness grows when it's given space.</h2>
+      <div class="ways">
+        <div class="way"><i></i><div><h3>Reflect</h3><p>Gentle daily prompts that change with your mood, so writing feels like a conversation rather than a task.</p></div></div>
+        <div class="way"><i></i><div><h3>Notice</h3><p>Over weeks, quiet patterns appear: what lifts you, what weighs on you, and when. Shown softly, never as a grade.</p></div></div>
+        <div class="way"><i></i><div><h3>Grow</h3><p>Small intentions you choose yourself, revisited when you're ready. Your pace is the only pace.</p></div></div>
+      </div>
+    </section>
+
+    <section id="privacy">
+      <h2>Yours, and only yours.</h2>
+      <p>Your reflections are encrypted, stored in the cloud so they follow you from phone to laptop, and never used for advertising. You can export or delete everything at any time.</p>
+      <p class="soft">innercanvas supports self-reflection and is not a substitute for professional care. If you're struggling, please reach out to someone you trust or a qualified professional.</p>
+    </section>
+
+    <section class="end">
+      <h2>Ready when you are.</h2>
+      <p class="soft">Early access opens soon.</p>
+      <a class="btn" href="#practice">Start your first reflection</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>innercanvas · a calm place to meet yourself</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var moods=[
+    ["Clear","What feels light or open right now?"],
+    ["Dawn","What is quietly beginning in you?"],
+    ["Misty","What feels hard to see clearly today?"],
+    ["Overcast","What has been weighing on you lately?"],
+    ["Stormy","What needs to be said out loud, just here?"]
+  ];
+  var KEY="innercanvas:entries",sel=null;
+  var box=document.getElementById("moods"),prompt=document.getElementById("prompt"),
+      note=document.getElementById("note"),log=document.getElementById("log"),clr=document.getElementById("clear");
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
+  function save(a){try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
+  moods.forEach(function(m,i){
+    var b=document.createElement("button");b.type="button";b.textContent=m[0];b.setAttribute("aria-pressed","false");
+    b.onclick=function(){sel=i;[].forEach.call(box.children,function(c,j){c.setAttribute("aria-pressed",j===i)});prompt.textContent=m[1]};
+    box.appendChild(b);
+  });
+  function render(){
+    var a=load();log.innerHTML="";clr.hidden=!a.length;
+    a.slice(-4).reverse().forEach(function(e){
+      var li=document.createElement("li"),s=document.createElement("small"),p=document.createElement("div");
+      s.textContent=e.mood+" · "+e.date;p.textContent=e.text;li.appendChild(s);li.appendChild(p);log.appendChild(li);
+    });
+  }
+  document.getElementById("keep").onclick=function(){
+    var t=note.value.trim();if(!t){note.focus();return}
+    var a=load();a.push({mood:sel===null?"Unnamed":moods[sel][0],text:t,date:new Date().toLocaleDateString(undefined,{month:"short",day:"numeric"})});
+    save(a);note.value="";render();
+  };
+  clr.onclick=function(e){e.preventDefault();try{localStorage.removeItem(KEY)}catch(x){}render()};
+  render();
+  var cue=document.getElementById("cue"),inn=true;
+  setInterval(function(){inn=!inn;cue.textContent=inn?"Breathe in":"Breathe out"},4000);
+})();
+</script>
+</body>
+</html>
